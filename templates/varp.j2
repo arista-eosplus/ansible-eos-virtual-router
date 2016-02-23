@@ -1,0 +1,119 @@
+! templates/varp.j2
+#jinja2: trim_blocks: False
+#jinja2: lstrip_blocks: False
+
+{% set vlanid = item.vlanid %}
+{% set state = item.state | default(eos_default_vlan_state) %}
+{% set vlan_block = _eos_config | config_block("vlan %s" % vlanid, indent=3) %}
+{% set intfc_block = _eos_config | config_block("interface Vlan%s" % vlanid, indent=3) %}
+
+{# ------------------------------------------------------- #}
+{% if state == 'absent' %} {# remove the vlan if it exists #}
+   {% if vlan_block %}
+
+no vlan {{ vlanid }}
+
+   {% endif %}
+   {% if intfc_block %}
+
+no interface Vlan{{ vlanid }}
+
+   {% endif %}
+{# ----------------------------- #}
+{% else %} {# configure the vlan #}
+
+   {# ------------------------------- #}
+   {# first configure the vlan itself #}
+
+vlan {{ vlanid }}
+
+   {# set the vlan name, if specified. otherwise use the default name #}
+   {% if item.name is defined %}
+
+   name {{ item.name }}
+
+   {% else %} {# item.name not defined, set to default #}
+      {% set def_name = "VLAN%04d" % ( vlanid | int ) %}
+
+   name {{ def_name }}
+
+   {% endif %} {# if name for vlan #}
+
+   {# set the vlan enabled state #}
+   {% if item.enable is defined and not item.enable %}
+
+   state suspend
+
+   {% else %}
+
+   state active
+
+   {% endif %} {# if enabled for vlan #}
+
+   {# --------------------------------- #}
+   {# then configure the vlan interface #}
+
+interface Vlan{{ vlanid }}
+
+   {# set the interface description #}
+   {% if item.description is defined %}
+
+   description {{ item.description }}
+
+   {% else %}
+
+   no description
+
+   {% endif %} {# if description for interface #}
+
+   {# set the interface shutdown state #}
+   {% if item.enable is defined and not item.enable %}
+
+   shutdown
+
+   {% else %}
+
+   no shutdown
+
+   {% endif %} {# if enabled for interface #}
+
+   {# set the interface address #}
+   {% if item.interface_addr is defined %}
+
+   ip address {{ item.interface_addr }}
+
+   {% else %}
+
+   no ip address
+
+   {% endif %} {# if interface_addr #}
+
+   {# set the virtual addresses associated with the vlan #}
+   {% set virtual_addrs = item.virtual_addrs | default([]) %}
+   {% set match = [] %}
+   {% if intfc_block %}
+      {% set match = intfc_block | join('\n') | re_findall("ip virtual-router address ([\d\.]+)") %}
+   {% endif %}
+
+   {# if no match found, nothing to remove, otherwise remove any
+   {# addresses not in the virtual_addrs list #}
+   {% if match %}
+      {% set remove_list = match | difference(virtual_addrs) %}
+      {% if remove_list %}
+         {% for addr in remove_list %}
+
+   no ip virtual-router address {{ addr }}
+
+         {% endfor %} {# for remove_list #}
+      {% endif %} {# if remove_list #}
+   {% endif %} {# if match #}
+
+   {# add any addresses not already configured #}
+   {% set add_list = virtual_addrs | difference(match) %}
+   {% for addr in add_list %}
+
+   ip virtual-router address {{ addr }}
+
+   {% endfor %} {# add_list #}
+
+{% endif %} {# if state #}

@@ -34,22 +34,22 @@ The tasks in this role are driven by the ``virtual_mac_addr``,
 
 **virtual_mac_addr**
 
-|        Key       |  Type  | Notes                                                                                                            |
-|:----------------:|:------:|------------------------------------------------------------------------------------------------------------------|
+|       Key        |  Type  | Notes                                    |
+| :--------------: | :----: | ---------------------------------------- |
 | virtual_mac_addr | string | The MAC address to assign as the virtual-router mac address. This value must be formatted like aa:bb:cc:dd:ee:ff |
 
 
 **varp_interfaces** (list) each entry contains the following keys:
 
-|            Key | Type                      | Notes                                                                                                      |
-|---------------:|---------------------------|------------------------------------------------------------------------------------------------------------|
-|         vlanid | string (required)         | The Vlanid where the Varp configuration will be placed.                                                    |
-|           name | string                    | The name given to the Vlan.                                                                                |
-|    description | string                    | The description placed on the Vlan interface.                                                              |
-|         enable | boolean: true*, false     | Enable or disable the Vlan and Vlan interface.                                                             |
-| interface_addr | string                    | The IP address assigned to the Vlan interface. Of the form, X.X.X.X/Y                                      |
-|  virtual_addrs | list                      | A list of IP addresses that will be shared among the pair of switches in the virtual router configuration. |
-|          state | choices: present*, absent | Set the state for the route configuration.                                                                 |
+|            Key | Type                      | Notes                                    |
+| -------------: | ------------------------- | ---------------------------------------- |
+|         vlanid | string (required)         | The Vlanid where the Varp configuration will be placed. |
+|           name | string                    | The name given to the Vlan.              |
+|    description | string                    | The description placed on the Vlan interface. |
+|         enable | boolean: true*, false     | Enable or disable the Vlan and Vlan interface. |
+| interface_addr | string                    | The IP address assigned to the Vlan interface. Of the form, X.X.X.X/Y |
+|  virtual_addrs | list                      | A list of IP addresses that will be shared among the pair of switches in the virtual router configuration. Pre-configured IP addresses not in the list will be removed from the Vlan interface. |
+|          state | choices: present*, absent | Set the state for the route configuration. |
 
 
 ```
@@ -90,8 +90,11 @@ Sample hosts file:
 Sample host_vars/leaf1.example.com
 
     virtual_mac_addr: "00:1c:73:00:00:99"
-
+    
     varp_interfaces:
+      - vlanid: 1000
+        name: Varp_Vlan1000
+        state: absent
       - vlanid: 1001
         name: Varp_Vlan1001
         description: My Vlan1001
@@ -99,19 +102,21 @@ Sample host_vars/leaf1.example.com
         interface_addr: 192.168.1.3/24
         virtual_addrs:
           - 192.168.1.1
+          - 192.168.11.1
       - vlanid: 1002
         name: Varp_Vlan1002
-        description: My Vlan1001
+        description: My Vlan1002
         enable: true
         interface_addr: 192.168.2.3/24
         virtual_addrs:
           - 192.168.2.1
+          - 192.168.12.1
 
 
 Sample host_vars/leaf2.example.com
 
     virtual_mac_addr: "00:1c:73:00:00:99"
-
+    
     varp_interfaces:
       - vlanid: 1001
         name: Varp_Vlan1001
@@ -120,13 +125,15 @@ Sample host_vars/leaf2.example.com
         interface_addr: 192.168.1.4/24
         virtual_addrs:
           - 192.168.1.1
+          - 192.168.11.1
       - vlanid: 1002
         name: Varp_Vlan1002
-        description: My Vlan1001
+        description: My Vlan1002
         enable: true
         interface_addr: 192.168.2.4/24
         virtual_addrs:
           - 192.168.2.1
+          - 192.168.12.1
 
 
 A simple playbook, leaf.yml

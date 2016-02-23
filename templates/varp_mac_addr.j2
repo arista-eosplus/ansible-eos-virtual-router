@@ -1,0 +1,13 @@
+! templates/varp_mac_addr.j2
+#jinja2: trim_blocks: False
+#jinja2: lstrip_blocks: False
+
+{% if virtual_mac_addr %}
+
+ip virtual-router mac-address {{ virtual_mac_addr }}
+
+{% else %}
+
+no ip virtual-router mac-address
+
+{% endif %}
