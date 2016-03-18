@@ -1,3 +1,4 @@
 ---
 # defaults file
-# these defaults will cause Ansible to skip all tasks
+
+eos_default_vlan_state: present
