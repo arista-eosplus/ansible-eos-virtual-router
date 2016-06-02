@@ -3,7 +3,305 @@ defaults:
   module: varp
 
 testcases:
-  - name: XXX XXX
+  - name: Add varp interfaces
     arguments:
+      varp_interfaces:
+        - vlanid: 1001
+          name: test_vlan1
+          description: My Vlan1001
+          enable: false
+          interface_addr: 192.168.1.4/24
+          virtual_addrs:
+            - 192.168.1.1
+        - vlanid: 1002
+          name: test_vlan2
+          description: My other Vlan1002
+          enable: true
+          interface_addr: 192.168.2.16/24
+          virtual_addrs:
+            - 192.168.2.1
+            - 192.168.2.3
+            - 192.168.2.2
     setup: |
+      no vlan 1001
+      no interface vlan 1001
+      no vlan 1002
+      no interface vlan 1002
     present: |
+      vlan 1001
+         name test_vlan1
+         state suspend
+      interface Vlan1001
+         description My Vlan1001
+         shutdown
+         ip address 192.168.1.4/24
+         ip virtual-router address 192.168.1.1
+      vlan 1002
+         name test_vlan2
+         state active
+      interface Vlan1002
+         description My other Vlan1002
+         no shutdown
+         ip address 192.168.2.16/24
+         ip virtual-router address 192.168.2.1
+         ip virtual-router address 192.168.2.2
+         ip virtual-router address 192.168.2.3
+
+  - name: Remove varp interfaces
+    arguments:
+      varp_interfaces:
+        - vlanid: 1003
+          state: absent
+        - vlanid: 1004
+          state: absent
+    setup: |
+      no vlan 1003
+      no interface vlan 1003
+      no vlan 1004
+      no interface vlan 1004
+      vlan 1003
+      name remove_vlan_1003
+      state suspend
+      interface Vlan1003
+      description remove this interface 1003
+      shutdown
+      ip address 192.168.3.10/24
+      ip virtual-router address 192.168.3.1
+      ip virtual-router address 192.168.3.2
+      vlan 1004
+      name remove_vlan_1004
+      state active
+      interface Vlan1004
+      description remove this interface 1004
+      no shutdown
+      ip address 192.168.4.20/24
+      ip virtual-router address 192.168.4.10
+      ip virtual-router address 192.168.4.12
+      vlan 1005
+      name keep_vlan_1005
+      state active
+      interface Vlan1006
+      description keep this interface 1005
+      no shutdown
+      ip address 192.168.5.50/24
+      ip virtual-router address 192.168.5.10
+      ip virtual-router address 192.168.5.12
+      ip virtual-router address 192.168.5.14
+    present: |
+      vlan 1005
+         name keep_vlan_1005
+         state active
+      interface Vlan1006
+         description keep this interface 1005
+         no shutdown
+         ip address 192.168.5.50/24
+         ip virtual-router address 192.168.5.10
+         ip virtual-router address 192.168.5.12
+         ip virtual-router address 192.168.5.14
+    absent: |
+      vlan 1003
+      interface Vlan1003
+      vlan 1004
+      interface Vlan1004
+
+  - name: Update varp interfaces
+    arguments:
+      varp_interfaces:
+        - vlanid: 1006
+          name: after_update_1006
+          enable: true
+          description: interface 1006 updated
+          interface_addr: 192.168.6.15/24
+          virtual_addrs:
+            - 192.168.6.1
+            - 192.168.6.3
+            - 192.168.6.5
+        - vlanid: 1007
+          name: after_update_1007
+          enable: false
+          description: interface 1007 updated
+          interface_addr: 192.168.7.20/24
+          virtual_addrs:
+            - 192.168.7.10
+        - vlanid: 1008
+          name: keep_name_1008
+          enable: true
+          description: interface 1008 updated
+          interface_addr: 192.168.8.50/24
+          virtual_addrs:
+            - 192.168.8.20
+            - 192.168.8.22
+            - 192.168.8.24
+            - 192.168.8.26
+    setup: |
+      no vlan 1006
+      no interface vlan 1006
+      no vlan 1007
+      no interface vlan 1007
+      no vlan 1008
+      no interface vlan 1008
+      vlan 1006
+      name update_vlan_1006
+      state suspend
+      interface Vlan1006
+      description update this interface 1006
+      no shutdown
+      ip address 192.168.6.10/24
+      ip virtual-router address 192.168.6.1
+      ip virtual-router address 192.168.6.2
+      vlan 1007
+      name update_vlan_1007
+      state active
+      interface Vlan1007
+      description update this interface 1007
+      no shutdown
+      ip address 192.168.7.20/24
+      ip virtual-router address 192.168.7.10
+      ip virtual-router address 192.168.7.12
+      vlan 1008
+      name keep_name_1008
+      state active
+      interface Vlan1008
+      description update this interface 1008
+      no shutdown
+      ip address 192.168.8.50/24
+      ip virtual-router address 192.168.8.10
+      ip virtual-router address 192.168.8.12
+      ip virtual-router address 192.168.8.14
+    present: |
+      vlan 1006
+         name after_update_1006
+         state active
+      interface Vlan1006
+         description interface 1006 updated
+         no shutdown
+         ip address 192.168.6.15/24
+         ip virtual-router address 192.168.6.1
+         ip virtual-router address 192.168.6.3
+         ip virtual-router address 192.168.6.5
+      vlan 1007
+         name after_update_1007
+         state suspend
+      interface Vlan1007
+         description interface 1007 updated
+         shutdown
+         ip address 192.168.7.20/24
+         ip virtual-router address 192.168.7.10
+      vlan 1008
+         name keep_name_1008
+         state active
+      interface Vlan1008
+         description interface 1008 updated
+         no shutdown
+         ip address 192.168.8.50/24
+         ip virtual-router address 192.168.8.20
+         ip virtual-router address 192.168.8.22
+         ip virtual-router address 192.168.8.24
+         ip virtual-router address 192.168.8.26
+    absent: |
+      vlan 1006
+         name update_vlan_1006
+         state suspend
+      interface Vlan1006
+         description update this interface 1006
+         ip address 192.168.6.10/24
+         ip virtual-router address 192.168.6.2
+      vlan 1007
+         name update_vlan_1007
+         state active
+      interface Vlan1007
+         description update this interface 1007
+         no shutdown
+         ip virtual-router address 192.168.7.12
+      interface Vlan1008
+         description update this interface 1008
+         ip virtual-router address 192.168.8.10
+         ip virtual-router address 192.168.8.12
+         ip virtual-router address 192.168.8.14
+
+  - name: Add, remove, update varp interfaces
+    arguments:
+      varp_interfaces:
+        - vlanid: 1009
+          name: after_update_1009
+          enable: true
+          description: interface 1009 updated
+          interface_addr: 192.168.9.15/24
+          virtual_addrs:
+            - 192.168.9.1
+            - 192.168.9.3
+            - 192.168.9.5
+        - vlanid: 1010
+          state: absent
+        - vlanid: 1011
+          name: add_vlan_1011
+          enable: true
+          description: interface 1011 added
+          interface_addr: 192.168.11.50/24
+          virtual_addrs:
+            - 192.168.11.20
+            - 192.168.11.22
+            - 192.168.11.24
+            - 192.168.11.26
+    setup: |
+      no vlan 1009
+      no interface vlan 1009
+      no vlan 1010
+      no interface vlan 1010
+      no vlan 1011
+      no interface vlan 1011
+      vlan 1009
+      name update_vlan_1009
+      state suspend
+      interface Vlan1009
+      description update this interface 1009
+      no shutdown
+      ip address 192.168.9.10/24
+      ip virtual-router address 192.168.9.1
+      ip virtual-router address 192.168.9.2
+      vlan 1010
+      name remove_vlan_1010
+      state active
+      interface Vlan1010
+      description remove this interface 1010
+      no shutdown
+      ip address 192.168.10.20/24
+      ip virtual-router address 192.168.10.10
+      ip virtual-router address 192.168.10.12
+    present: |
+      vlan 1009
+         name after_update_1009
+         state active
+      interface Vlan1009
+         description interface 1009 updated
+         no shutdown
+         ip address 192.168.9.15/24
+         ip virtual-router address 192.168.9.1
+         ip virtual-router address 192.168.9.3
+         ip virtual-router address 192.168.9.5
+      vlan 1011
+         name add_vlan_1011
+         state active
+      interface Vlan1011
+         description interface 1011 added
+         no shutdown
+         ip address 192.168.11.50/24
+         ip virtual-router address 192.168.11.20
+         ip virtual-router address 192.168.11.22
+         ip virtual-router address 192.168.11.24
+         ip virtual-router address 192.168.11.26
+    absent: |
+      vlan 1009
+         name update_vlan_1009
+         state suspend
+      interface Vlan1009
+         description update this interface 1009
+         ip address 192.168.9.10/24
+         ip virtual-router address 192.168.9.2
+      vlan 1010
+      interface Vlan1010
+      interface Vlan1008
+         description update this interface 1008
+         ip virtual-router address 192.168.8.10
+         ip virtual-router address 192.168.8.12
+         ip virtual-router address 192.168.8.14

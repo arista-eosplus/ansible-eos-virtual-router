@@ -1,0 +1,32 @@
+---
+defaults:
+  module: varp_mac_addr
+
+testcases:
+  - name: Set virtual-router mac address from not set
+    arguments:
+      virtual_mac_addr: 00:1c:29:00:00:73
+    setup: |
+      no ip virtual-router mac-address
+    present: |
+      ip virtual-router mac-address 00:1c:29:00:00:73
+
+  - name: Unset virtual-router mac address
+    arguments:
+      virtual_mac_addr: ''
+    setup: |
+      ip virtual-router mac-address 00:1c:29:00:00:75
+    present: |
+      no ip virtual-router mac-address
+    absent: |
+      ip virtual-router mac-address 00:1c:29:00:00:75
+
+  - name: Change virtual-router mac address
+    arguments:
+      virtual_mac_addr: 00:1c:29:00:00:77
+    setup: |
+      ip virtual-router mac-address 00:1c:29:00:00:79
+    present: |
+      ip virtual-router mac-address 00:1c:29:00:00:77
+    absent: |
+      ip virtual-router mac-address 00:1c:29:00:00:79
