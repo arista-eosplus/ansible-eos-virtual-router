@@ -1,0 +1,9 @@
+---
+defaults:
+  module: varp
+
+testcases:
+  - name: XXX XXX
+    arguments:
+    setup: |
+    present: |
