@@ -35,6 +35,7 @@
     transport: 'cli'
     use_ssl: "{{ use_ssl | default(omit) }}"
     username: "{{ username | default(omit) }}"
+  notify: save running config
   when: virtual_mac_addr is defined
 
 - name: Arista EOS VARP VLAN resources
@@ -51,4 +52,5 @@
     transport: 'cli'
     use_ssl: "{{ use_ssl | default(omit) }}"
     username: "{{ username | default(omit) }}"
+  notify: save running config
   with_items: "{{ varp_interfaces | default([]) }}"
