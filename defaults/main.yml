@@ -1,4 +1,5 @@
 ---
 # defaults file
+eos_save_running_config: true
 
 eos_default_vlan_state: present
