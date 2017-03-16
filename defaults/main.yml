@@ -3,3 +3,5 @@
 eos_save_running_config: true
 
 eos_default_vlan_state: present
+
+resource_version: '2.2'

@@ -1,0 +1,36 @@
+# Perform the EOS Virtual Router tasks under Ansible 2.2 or later
+# using the Ansible eos_config module
+
+- name: Arista EOS Virtual Router Mac Address (Ansible >= 2.2)
+  eos_config:
+    src: varp_mac_addr.j2
+    defaults: true
+    config: "{{ _eos_config | default(omit) }}"
+    auth_pass: "{{ auth_pass | default(omit) }}"
+    authorize: "{{ authorize | default(omit) }}"
+    host: "{{ host | default(omit) }}"
+    password: "{{ password | default(omit) }}"
+    port: "{{ port | default(omit) }}"
+    provider: "{{ provider | default(omit) }}"
+    transport: 'cli'
+    use_ssl: "{{ use_ssl | default(omit) }}"
+    username: "{{ username | default(omit) }}"
+  notify: save running config
+  when: virtual_mac_addr is defined
+
+- name: Arista EOS VARP VLAN resources (Ansible >= 2.2)
+  eos_config    :
+    src: varp.j2
+    defaults: true
+    config: "{{ _eos_config | default(omit) }}"
+    auth_pass: "{{ auth_pass | default(omit) }}"
+    authorize: "{{ authorize | default(omit) }}"
+    host: "{{ host | default(omit) }}"
+    password: "{{ password | default(omit) }}"
+    port: "{{ port | default(omit) }}"
+    provider: "{{ provider | default(omit) }}"
+    transport: 'cli'
+    use_ssl: "{{ use_ssl | default(omit) }}"
+    username: "{{ username | default(omit) }}"
+  notify: save running config
+  with_items: "{{ varp_interfaces | default([]) }}"

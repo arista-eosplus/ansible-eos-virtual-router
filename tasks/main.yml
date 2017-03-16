@@ -1,4 +1,14 @@
 ---
+# Determine what resources we will use for running the role:
+# If using Ansible 2.1 or lower, we can use eos_template
+# If using Ansible 2.2 or higher, we must use eos_config
+# resource_version is set to 2.2 by default (since most users will be
+# on updated versions), change it if we're running 2.1 or lower.'
+- set_fact:
+    resource_version: '2.1'
+  when: ansible_version.major < 2 or
+        (ansible_version.major == 2 and ansible_version.minor < 2)
+
 - name: Gather EOS configuration
   eos_command:
     commands: 'show running-config all | exclude \.\*'
@@ -21,36 +31,6 @@
   no_log: "{{ no_log | default(true) }}"
   when: _eos_config is not defined
 
-- name: Arista EOS Virtual Router Mac Address
-  eos_template:
-    src: varp_mac_addr.j2
-    include_defaults: true
-    config: "{{ _eos_config | default(omit) }}"
-    auth_pass: "{{ auth_pass | default(omit) }}"
-    authorize: "{{ authorize | default(omit) }}"
-    host: "{{ host | default(omit) }}"
-    password: "{{ password | default(omit) }}"
-    port: "{{ port | default(omit) }}"
-    provider: "{{ provider | default(omit) }}"
-    transport: 'cli'
-    use_ssl: "{{ use_ssl | default(omit) }}"
-    username: "{{ username | default(omit) }}"
-  notify: save running config
-  when: virtual_mac_addr is defined
-
-- name: Arista EOS VARP VLAN resources
-  eos_template:
-    src: varp.j2
-    include_defaults: true
-    config: "{{ _eos_config | default(omit) }}"
-    auth_pass: "{{ auth_pass | default(omit) }}"
-    authorize: "{{ authorize | default(omit) }}"
-    host: "{{ host | default(omit) }}"
-    password: "{{ password | default(omit) }}"
-    port: "{{ port | default(omit) }}"
-    provider: "{{ provider | default(omit) }}"
-    transport: 'cli'
-    use_ssl: "{{ use_ssl | default(omit) }}"
-    username: "{{ username | default(omit) }}"
-  notify: save running config
-  with_items: "{{ varp_interfaces | default([]) }}"
+# Import the resource tasks based on the version of ansible in use
+- name: Include the Arista EOS Virtual Router resources
+  include: "tasks/resources{{ resource_version }}.yml"
