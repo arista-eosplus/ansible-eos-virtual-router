@@ -5,3 +5,6 @@ eos_save_running_config: true
 eos_default_vlan_state: present
 
 resource_version: '2.2'
+gather_config_commands:
+  - command: 'show running-config all | exclude \.\*'
+    output: 'text'
