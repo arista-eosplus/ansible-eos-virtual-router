@@ -7,7 +7,7 @@ testcases:
     arguments:
       virtual_mac_addr: 00:1c:29:00:00:73
     setup: |
-      no ip virtual-router mac-address
+      ip virtual-router mac-address 00:00:00:00:00:00
     present: |
       ip virtual-router mac-address 00:1c:29:00:00:73
 
@@ -16,8 +16,6 @@ testcases:
       virtual_mac_addr: ''
     setup: |
       ip virtual-router mac-address 00:1c:29:00:00:75
-    present: |
-      no ip virtual-router mac-address
     absent: |
       ip virtual-router mac-address 00:1c:29:00:00:75
 
