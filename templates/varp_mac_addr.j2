@@ -2,12 +2,25 @@
 #jinja2: trim_blocks: False
 #jinja2: lstrip_blocks: False
 
+{# From EOS 4.17 and up, removing the ip virtual-router mac-address #}
+{# is done by setting the addr to 00:00:00:00:00:00. We need to check #}
+{# the version and process the removal of the mac addr appropriately #}
+{% set version = _eos_config | re_search("! device: .*\(.*, EOS-(.*)\)$") %}
+{% set eos_417_up = version.group(1) | version_compare("4.17", ">=") %}
+
 {% if virtual_mac_addr %}
 
 ip virtual-router mac-address {{ virtual_mac_addr }}
 
 {% else %}
+   {% if eos_417_up %}
+
+ip virtual-router mac-address 00:00:00:00:00:00
+
+   {% else %}
 
 no ip virtual-router mac-address
+
+   {% endif %} # eos_417_up
 
 {% endif %}
